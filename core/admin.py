@@ -1,32 +1,35 @@
 from django.contrib import admin
-from .models import User, Team, Player, Match, Attendance, Leaderboard
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_player', 'is_coach', 'is_admin')
-    list_filter = ('is_player', 'is_coach', 'is_admin')
-
-
-@admin.register(Team)
-class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city', 'total_wins', 'total_losses')
-
+from .models import Player, Coach, Team, Match, Attendance, Leaderboard
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'team', 'matches_played', 'wins', 'losses', 'attendance', 'performance_score')
+    list_display = ('id', 'user', 'team', 'joined_at')
+    search_fields = ('user__username',)
 
+@admin.register(Coach)
+class CoachAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'experience', 'specialization')
+    search_fields = ('user__username',)
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'coach', 'created_at')
+    search_fields = ('name', 'coach__user__username')
 
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ('team1', 'team2', 'date', 'winner', 'team1_score', 'team2_score')
-
+    list_display = ('id', 'team1', 'team2', 'date', 'is_completed')
+    search_fields = ('team1__name', 'team2__name')
+    list_filter = ('is_completed', 'date')
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('player', 'session_date', 'attended')
-
+    list_display = ('id', 'player', 'match', 'attended')
+    search_fields = ('player__user__username',)
+    list_filter = ('attended',)
 
 @admin.register(Leaderboard)
 class LeaderboardAdmin(admin.ModelAdmin):
-    list_display = ('player', 'total_score', 'rank')
+    list_display = ('id', 'player', 'score')
+    search_fields = ('player__user__username',)
+    ordering = ('-score',)
