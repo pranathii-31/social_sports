@@ -19,12 +19,15 @@ headers: {
 });
 
 
-// attach token from localStorage automatically if present
+// attach JWT access token from localStorage automatically if present
 api.interceptors.request.use((config) => {
-const token = localStorage.getItem("access_token");
-if (token) config.headers.Authorization = `Bearer ${token}`;
-return config;
+  const access = localStorage.getItem("access");
+  if (access) {
+    config.headers.Authorization = `Bearer ${access}`;
+  }
+  return config;
 });
+
 
 
 export default api;

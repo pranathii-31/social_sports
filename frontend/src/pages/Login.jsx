@@ -1,34 +1,43 @@
+// frontend/src/pages/Login.jsx
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { login as loginService } from "../services/auth";
 
-const API_URL = process.env.REACT_APP_API_URL;
-
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const Login = () => {
   const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post(`${API_URL}/token/`, {
-        username,
-        password,
-      });
 
-      // Save tokens
-      localStorage.setItem("access", res.data.access);
-      localStorage.setItem("refresh", res.data.refresh);
-      setError("");
+    try {
+      const result = await loginService(username, password);
+      const role = result.role;
 
       alert("✅ Login successful!");
-      navigate("/dashboard"); // redirect to dashboard
+      setError("");
+
+      // Redirect based on role
+      if (role === "admin") {
+        navigate("/admin-dashboard");
+      } else if (role === "player") {
+        navigate("/player-dashboard");
+      } else if (role === "coach") {
+        navigate("/coach-dashboard");
+      } else if (role === "manager") {
+        navigate("/manager-dashboard");
+      } else {
+        navigate("/");
+      }
+
     } catch (err) {
-      setError("❌ Invalid credentials. Please try again.");
-      console.error(err);
+      console.error("Login failed:", err.response?.data || err.message);
+      setError("❌ Invalid credentials or unauthorized access.");
     }
   };
 
@@ -36,6 +45,7 @@ const Login = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-sm">
         <h2 className="text-2xl font-semibold mb-6 text-center">Sign In</h2>
+
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="text"
@@ -45,6 +55,7 @@ const Login = () => {
             required
             className="w-full p-2 border rounded-md"
           />
+
           <input
             type="password"
             placeholder="Password"
@@ -53,13 +64,15 @@ const Login = () => {
             required
             className="w-full p-2 border rounded-md"
           />
+
           <button
             type="submit"
-            className="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700"
+            className="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition duration-200"
           >
             Sign In
           </button>
         </form>
+
         {error && (
           <p className="text-center text-sm mt-4 text-red-500">{error}</p>
         )}
