@@ -1,7 +1,11 @@
 from django.contrib import admin
-from .models import Player, Coach, Team, Match, Attendance, Leaderboard
+from .models import (
+    Player, Coach, Team, Match, Attendance, Leaderboard, User,
+    Manager, Admin, ManagerSport, TeamProposal, TeamAssignmentRequest,
+    Tournament, TournamentTeam, TournamentMatch, CricketMatchState, MatchPlayerStats, TournamentPoints,
+    Sport, PromotionRequest, CoachPlayerLinkRequest, Notification, PlayerSportProfile
+)
 from django.contrib.auth.admin import UserAdmin
-from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -57,3 +61,113 @@ class LeaderboardAdmin(admin.ModelAdmin):
     list_display = ('id', 'player', 'score')
     search_fields = ('player__user__username',)
     ordering = ('-score',)
+
+
+@admin.register(Manager)
+class ManagerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'manager_id', 'created_at')
+    search_fields = ('user__username', 'manager_id')
+
+
+@admin.register(Admin)
+class AdminProfileAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'admin_id', 'created_at')
+    search_fields = ('user__username', 'admin_id')
+
+
+@admin.register(ManagerSport)
+class ManagerSportAdmin(admin.ModelAdmin):
+    list_display = ('id', 'manager', 'sport', 'assigned_by', 'assigned_at')
+    list_filter = ('sport', 'assigned_at')
+
+
+@admin.register(TeamProposal)
+class TeamProposalAdmin(admin.ModelAdmin):
+    list_display = ('id', 'team_name', 'coach', 'manager', 'sport', 'status', 'created_at')
+    list_filter = ('status', 'sport', 'created_at')
+    search_fields = ('team_name', 'coach__user__username', 'manager__username')
+
+
+@admin.register(TeamAssignmentRequest)
+class TeamAssignmentRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'team', 'coach', 'manager', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('team__name', 'coach__user__username', 'manager__username')
+
+
+@admin.register(Tournament)
+class TournamentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'sport', 'manager', 'status', 'start_date', 'end_date')
+    list_filter = ('status', 'sport', 'start_date')
+    search_fields = ('name', 'manager__username')
+
+
+@admin.register(TournamentTeam)
+class TournamentTeamAdmin(admin.ModelAdmin):
+    list_display = ('id', 'tournament', 'team', 'registered_at')
+    list_filter = ('tournament', 'registered_at')
+
+
+@admin.register(TournamentMatch)
+class TournamentMatchAdmin(admin.ModelAdmin):
+    list_display = ('id', 'tournament', 'team1', 'team2', 'match_number', 'date', 'status', 'is_completed')
+    list_filter = ('tournament', 'status', 'is_completed', 'date')
+    search_fields = ('tournament__name', 'team1__name', 'team2__name')
+
+
+@admin.register(CricketMatchState)
+class CricketMatchStateAdmin(admin.ModelAdmin):
+    list_display = ('id', 'match', 'current_batting_team', 'current_over', 'current_ball', 'updated_at')
+    list_filter = ('updated_at',)
+    search_fields = ('match__tournament__name', 'match__team1__name', 'match__team2__name')
+
+
+@admin.register(MatchPlayerStats)
+class MatchPlayerStatsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'match', 'player', 'team', 'runs_scored', 'wickets_taken', 'is_out')
+    list_filter = ('is_out', 'match__tournament')
+    search_fields = ('player__user__username', 'team__name', 'match__tournament__name')
+    ordering = ('-runs_scored', '-wickets_taken')
+
+
+@admin.register(TournamentPoints)
+class TournamentPointsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'tournament', 'team', 'matches_played', 'matches_won', 'points', 'net_run_rate')
+    list_filter = ('tournament',)
+    search_fields = ('tournament__name', 'team__name')
+    ordering = ('-points', '-net_run_rate')
+
+
+@admin.register(PlayerSportProfile)
+class PlayerSportProfileAdmin(admin.ModelAdmin):
+    list_display = ('id', 'player', 'sport', 'coach', 'team', 'session_count', 'career_score', 'is_active')
+    list_filter = ('sport', 'is_active', 'coach')
+    search_fields = ('player__user__username', 'sport__name', 'coach__user__username')
+
+
+@admin.register(Sport)
+class SportAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'sport_type', 'description')
+    list_filter = ('sport_type',)
+    search_fields = ('name',)
+
+
+@admin.register(PromotionRequest)
+class PromotionRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'sport', 'status', 'requested_at', 'decided_by')
+    list_filter = ('status', 'sport', 'requested_at')
+    search_fields = ('user__username',)
+
+
+@admin.register(CoachPlayerLinkRequest)
+class CoachPlayerLinkRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'coach', 'player', 'sport', 'direction', 'status', 'created_at')
+    list_filter = ('status', 'direction', 'sport', 'created_at')
+    search_fields = ('coach__user__username', 'player__user__username')
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'type', 'title', 'created_at', 'read_at')
+    list_filter = ('type', 'created_at', 'read_at')
+    search_fields = ('user__username', 'title', 'message')
